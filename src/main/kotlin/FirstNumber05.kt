@@ -1,12 +1,17 @@
+import java.math.BigDecimal
+import java.math.RoundingMode
+import kotlin.math.pow
+import kotlin.math.sqrt
+
 class FirstNumber05 {
     /**
      * Binary search
      *
      * @param intArray array you want to search
      * @param searchedNumber number to find
-     * @param left left most bound to search
+     * @param left left most bound to search (don't change)
      * @param right right most bound to search (don't change)
-     * @return index of searchedNumber, else -1 (don't change)
+     * @return index of searchedNumber, else -1
      */
     tailrec fun binarySearch (intArray : IntArray, searchedNumber : Int, left : Int = 0, right : Int = intArray.size-1) : Int{
         // handle not existing
@@ -23,7 +28,13 @@ class FirstNumber05 {
             binarySearch(intArray, searchedNumber, index+1, right)
         }
     }
-
+    /**
+     * Binary search non-recursive
+     *
+     * @param intArray array you want to search
+     * @param searchedNumber number to find
+     * @return index of searchedNumber, else -1
+     */
     fun binarySearchNonRecursive(intArray: IntArray, searchedNumber: Int) : Int{
         var left = 0
         var right = intArray.size-1
@@ -47,8 +58,10 @@ class FirstNumber05 {
         }
     }
     data class Fraction(val nominator: Int, val denominator: Int) {
-
-        private fun multiply(frac: Fraction): Fraction {
+        init {
+            if (this.denominator == 0) throw ArithmeticException("Div by 0")
+        }
+        fun multiply(frac: Fraction): Fraction {
             return this.reduce(Fraction(nominator * frac.nominator, denominator * frac.denominator))
         }
 
@@ -74,9 +87,9 @@ class FirstNumber05 {
          * @param frac fraction to gcd
          * @return gcd of a fraction
          */
-        private fun reduce(frac: Fraction): Fraction {
-            val gcd = euclideanAlgorithm(frac.nominator, frac.denominator)
-            return Fraction(frac.nominator / gcd, frac.denominator / gcd)
+        fun reduce(frac: Fraction): Fraction {
+            val gcd = euclideanAlgorithm(this.nominator, this.denominator)
+            return Fraction(this.nominator / gcd, this.denominator / gcd)
         }
         /**
          * Euclidean algorithm
@@ -85,16 +98,70 @@ class FirstNumber05 {
          * @param b denominator
          * @return gcd
          */
-        private fun euclideanAlgorithm(a: Int, b: Int): Int {
-            return if (b == 0) {
-                a
-            } else if (a == 0) {
-                b
-            } else if (a > b) {
-                euclideanAlgorithm(a - b, b)
-            } else {
-                euclideanAlgorithm(a, b - a)
-            }
+        fun euclideanAlgorithm(a: Int, b: Int): Int {
+            return if (b == 0) a else euclideanAlgorithm(b, a % b)
+        }
+    }
+
+    /**
+     * Point in coordinate system
+     *
+     * @property x
+     * @property y
+     * @constructor Create a Point
+     */
+    data class Point (val x : Double, val y : Double) {
+        fun distance(p : Point) : Double {
+            // use Pythagoras (x2-x1)^2 + (y2-y1)^2 = c^2
+            return sqrt((p.x - this.x).pow(2) + (p.y - this.y).pow(2))
+        }
+    }
+
+    /**
+     * Triangle
+     *
+     * @property a first Point
+     * @property b second Point
+     * @property c third Point
+     * @constructor Create a Triangle out of 3 Points
+     */
+    data class Triangle (val a : Point, val b : Point, val c : Point) {
+        /**
+         * Perimeter
+         *
+         * @return perimeter as Double
+         */
+        fun perimeter() : Double{
+            val triple = lengthOfSides()
+            val result = triple.first+triple.second+triple.third
+            return result.toDouble()
+        }
+
+        /**
+         * Length of sides
+         * 1. - 2.; 2. - 3.; 3 - 1. Point
+         *
+         * @return Triple with length of each side as Double
+         */
+        fun lengthOfSides() : Triple<Double, Double, Double> {
+            return Triple(a.distance(b), b.distance(c), c.distance(a))
+        }
+
+        /**
+         * Area via Heron's formula
+         *
+         * @return area of triangle as Double
+         */
+        fun area() : Double{
+            val perimeter = perimeter()
+            val lengthOfSides = lengthOfSides()
+            val result =
+                sqrt(
+                    perimeter
+                * (perimeter-lengthOfSides.first)
+                * (perimeter-lengthOfSides.second)
+                * (perimeter-lengthOfSides.third))
+            return result.toDouble()
         }
     }
 }
